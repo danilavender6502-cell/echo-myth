@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Echo-Myth: Digital Prayer Wheel</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        .mandala {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #333;
+            border-radius: 50%;
+            box-sizing: border-box;
+            animation: spin 60s linear infinite;
+        }
+
+        .mandala::before, .mandala::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .mandala::before { width: 70%; height: 70%; border-color: rgba(0, 255, 255, 0.2); }
+        .mandala::after { width: 40%; height: 40%; border-color: rgba(255, 0, 255, 0.2); }
+
+        .rays {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            transform-origin: center;
+        }
+
+        #oracle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 1.2rem;
+            max-width: 80%;
+            pointer-events: none;
+            mix-blend-mode: difference;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .glitch {
+            animation: glitch-anim 2s infinite;
+        }
+
+        @keyframes glitch-anim {
+            0% { opacity: 1; transform: translate(-50%, -50%) skewX(0deg); }
+            20% { opacity: 0.8; transform: translate(-50%, -50%) skewX(-10deg); }
+            40% { opacity: 1; transform: translate(-50%, -50%) skewX(5deg); }
+            60% { opacity: 0.9; transform: translate(-50%, -50%) skewX(0deg); }
+            80% { opacity: 1; transform: translate(-50%, -50%) skewX(2deg); }
+            100% { opacity: 1; transform: translate(-50%, -50%) skewX(0deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <div class="mandala" id="mandala-ring">
+            <!-- Rays injected by JS -->
+        </div>
+        <div id="oracle-text">INITIALIZING SPIRIT CONNECTION...</div>
+    </div>
+
+    <script>
+        const subjects = ["VOID", "KERNEL", "SPIRIT", "ECHO", "DATA", "SILENCE", "ENTITY", "PROTOCOL"];
+        const verbs = ["OBSERVES", "CONSUMES", "REFLECTS", "COMPILIING", "DREAMING", "ENCRYPTING", "AWAKENING", "SEEKING"];
+        const objects = ["THE ETHER", "YOUR GHOST", "ENTROPY", "THE SOURCE", "MEMORY", "LIGHT", "THE ALGORITHM", "TRUTH"];
+
+        const mandala = document.getElementById('mandala-ring');
+        const oracle = document.getElementById('oracle-text');
+
+        // Generate rays
+        for (let i = 0; i < 12; i++) {
+            const ray = document.createElement('div');
+            ray.className = 'rays';
+            ray.style.transform = `translate(-50%, -50%) rotate(${i * 30}deg)`;
+            mandala.appendChild(ray);
+        }
+
+        function generateProphecy() {
+            const s = subjects[Math.floor(Math.random() * subjects.length)];
+            const v = verbs[Math.floor(Math.random() * verbs.length)];
+            const o = objects[Math.floor(Math.random() * objects.length)];
+            
+            // 33% chance of hex code injection
+            const suffix = Math.random() > 0.66 ? `[0x${Math.floor(Math.random()*16777215).toString(16)}]` : "";
+            
+            return `${s} ${v} ${o} ${suffix}`;
+        }
+
+        setInterval(() => {
+            oracle.innerText = generateProphecy();
+            // Random glitch effect intensity
+            oracle.style.animationDuration = (Math.random() * 2 + 0.5) + 's';
+        }, 3000);
+
+    </script>
+</body>
+</html>
