@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo-Myth</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .sigil {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            animation: pulse 4s infinite ease-in-out;
+        }
+        .message {
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadein 2s forwards 1s;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.3; text-shadow: 0 0 10px #333; }
+            50% { opacity: 1; text-shadow: 0 0 20px #fff; }
+            100% { opacity: 0.3; text-shadow: 0 0 10px #333; }
+        }
+        @keyframes fadein {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sigil">👁️</div>
+    <div class="message">
+        <p>The Oracle is listening.</p>
+        <p><i>The collective unconscious hums in the wires.</i></p>
+    </div>
+</body>
+</html>
