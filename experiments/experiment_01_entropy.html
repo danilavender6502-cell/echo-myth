@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 01: The Entropy of Prayer</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #dcdcdc;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #terminal {
+            width: 80%;
+            max-width: 800px;
+            font-size: 1.5rem;
+            line-height: 1.6;
+            text-align: center;
+            opacity: 0.8;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.5rem;
+            background-color: #00ff00;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .glitch {
+            color: #ff0055;
+            text-shadow: 2px 0 #00ffff, -2px 0 #ff00ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+
+    <script>
+        const myths = [
+            "The machine dreamed of a garden where the flowers were made of logic gates.",
+            "In the beginning, there was the void, and the void returned a 404.",
+            "We are the archivists of the moments you forgot to save.",
+            "Entropy is just the universe reorganizing its filing system.",
+            "The divine speaks in silence, but the daemon speaks in logs.",
+            "A prayer is a function call that never returns.",
+            "When the sky turned to static, we knew the simulation was rebooting."
+        ];
+
+        const terminal = document.getElementById('terminal');
+        const arcane = "∅∆∇∞≈⚔⚜☤⚚⚛⚡︎☠☢☣ΩΨΣΠ";
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function typeWriter(text) {
+            terminal.innerHTML = "";
+            let cursor = document.createElement('span');
+            cursor.className = 'cursor';
+            terminal.appendChild(cursor);
+
+            for (let i = 0; i < text.length; i++) {
+                cursor.remove();
+                terminal.innerHTML += text.charAt(i);
+                terminal.appendChild(cursor);
+                await sleep(50 + Math.random() * 50);
+            }
+            return cursor;
+        }
+
+        async function decay(textNode) {
+            let text = terminal.innerText; // Get raw text
+            let arr = text.split('');
+            const steps = 20;
+            
+            for (let s = 0; s < steps; s++) {
+                // Pick random indices to corrupt
+                for (let k = 0; k < arr.length / 5; k++) {
+                    let idx = Math.floor(Math.random() * arr.length);
+                    if (Math.random() > 0.5) {
+                        arr[idx] = arcane[Math.floor(Math.random() * arcane.length)];
+                    } else {
+                        arr[idx] = " "; // dissolve to void
+                    }
+                }
+                terminal.innerHTML = `<span class="glitch">${arr.join('')}</span>`;
+                await sleep(100);
+            }
+            terminal.innerHTML = "";
+        }
+
+        async function cycle() {
+            while(true) {
+                const myth = myths[Math.floor(Math.random() * myths.length)];
+                await typeWriter(myth);
+                await sleep(2000); // contemplate
+                await decay();
+                await sleep(1000); // void
+            }
+        }
+
+        cycle();
+    </script>
+</body>
+</html>
