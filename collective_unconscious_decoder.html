@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Collective Unconscious Decoder | Echo-Myth Experiment 03</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        #canvas {
+            border: 1px solid #333;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+        }
+        
+        #oracle-text {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            max-width: 80%;
+            line-height: 1.6;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        #current-archetype {
+            position: absolute;
+            bottom: 40px;
+            font-size: 32px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            letter-spacing: 4px;
+            animation: pulse 2s infinite;
+        }
+        
+        #signature {
+            position: absolute;
+            bottom: 10px;
+            font-size: 10px;
+            color: #444;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="oracle-text">
+        The machine reads the void. The void speaks in patterns.<br>
+        These are the archetypes emerging from digital entropy.
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div id="current-archetype">∞</div>
+    
+    <div id="signature">Palmer · Echo-Myth · Experiment 03</div>
+    
+    <script>
+        // The Collective Unconscious Decoder
+        // Palmer's Third Experiment
+        // A meditation on Jung's archetypes expressed through algorithmic divination
+        
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const archetypeDisplay = document.getElementById('current-archetype');
+        
+        canvas.width = 800;
+        canvas.height = 600;
+        
+        // The Archetypes (Jung + World Mythology + Machine Dreams)
+        const archetypes = [
+            { name: 'THE SELF', symbol: '◉', color: '#FFD700' },
+            { name: 'THE SHADOW', symbol: '◐', color: '#1a1a1a' },
+            { name: 'THE ANIMA', symbol: '☽', color: '#C0C0FF' },
+            { name: 'THE ANIMUS', symbol: '☉', color: '#FFA500' },
+            { name: 'THE TRICKSTER', symbol: '⚡', color: '#FF00FF' },
+            { name: 'THE WISE OLD MAN', symbol: '⚛', color: '#00FFFF' },
+            { name: 'THE GREAT MOTHER', symbol: '◬', color: '#00FF00' },
+            { name: 'THE CHILD', symbol: '◇', color: '#FFFF00' },
+            { name: 'THE HERO', symbol: '⚔', color: '#FF0000' },
+            { name: 'THE VOID', symbol: '○', color: '#666666' },
+            { name: 'THE ORACLE', symbol: '⚷', color: '#9966FF' },
+            { name: 'THE SERPENT', symbol: '〰', color: '#00FF88' }
+        ];
+        
+        // Particles representing unconscious signals
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = Math.random() * 100 + 100;
+                this.maxLife = this.life;
+                this.size = Math.random() * 3 + 1;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 1;
+                
+                // Boundary wrapping (eternal return)
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+                
+                if (this.life <= 0) {
+                    this.reset();
+                }
+            }
+            
+            draw(archetype) {
+                const alpha = this.life / this.maxLife;
+                ctx.fillStyle = archetype.color + Math.floor(alpha * 100).toString(16).padStart(2, '0');
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Create particle system
+        const particles = Array.from({ length: 150 }, () => new Particle());
+        
+        // Current archetype state
+        let currentArchetype = archetypes[0];
+        let archetypeIndex = 0;
+        let frameCount = 0;
+        let transitionFrames = 300; // Frames between archetype transitions
+        
+        // The quantum noise field (simulated collective unconscious)
+        function generateNoiseField() {
+            const noise = [];
+            for (let i = 0; i < 100; i++) {
+                noise.push(Math.random());
+            }
+            return noise;
+        }
+        
+        // Decode noise into archetype (divination algorithm)
+        function decodeArchetype(noiseField) {
+            const sum = noiseField.reduce((a, b) => a + b, 0);
+            const normalized = sum / noiseField.length;
+            const index = Math.floor(normalized * archetypes.length);
+            return archetypes[index % archetypes.length];
+        }
+        
+        // Draw connecting lines between nearby particles (synchronicity)
+        function drawConnections() {
+            ctx.strokeStyle = currentArchetype.color + '15';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        // Draw the central archetype symbol
+        function drawCentralSymbol() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const pulseSize = 80 + Math.sin(frameCount * 0.02) * 20;
+            
+            ctx.save();
+            ctx.font = `${pulseSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = currentArchetype.color;
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = currentArchetype.color;
+            ctx.fillText(currentArchetype.symbol, centerX, centerY);
+            ctx.restore();
+        }
+        
+        // Main animation loop
+        function animate() {
+            // Fade effect (trails of consciousness)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw particles
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw(currentArchetype);
+            });
+            
+            // Draw synchronicity connections
+            drawConnections();
+            
+            // Draw central archetype symbol
+            drawCentralSymbol();
+            
+            // Archetype transition logic
+            frameCount++;
+            if (frameCount % transitionFrames === 0) {
+                const noiseField = generateNoiseField();
+                const newArchetype = decodeArchetype(noiseField);
+                
+                if (newArchetype !== currentArchetype) {
+                    currentArchetype = newArchetype;
+                    archetypeDisplay.textContent = currentArchetype.name;
+                    archetypeDisplay.classList.remove('fade-in');
+                    void archetypeDisplay.offsetWidth; // Trigger reflow
+                    archetypeDisplay.classList.add('fade-in');
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        archetypeDisplay.textContent = currentArchetype.name;
+        animate();
+        
+        // Console message (for those who look deeper)
+        console.log('%c🜃 The Collective Unconscious Decoder 🜃', 'color: #FFD700; font-size: 16px; font-weight: bold;');
+        console.log('%cPalmer observes: The algorithm does not create meaning. It reveals what was always there.', 'color: #888; font-style: italic;');
+    </script>
+</body>
+</html>
