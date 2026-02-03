@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Comet's Requiem | Echo-Myth</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background: #000;
+            cursor: none;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #canvas {
+            display: block;
+            background: radial-gradient(ellipse at center, #0a0a1a 0%, #000000 100%);
+        }
+        
+        #overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            pointer-events: none;
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transition: opacity 1s;
+        }
+        
+        #overlay.hidden {
+            opacity: 0;
+        }
+        
+        #subtitle {
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.5;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="overlay">
+        THE COMET'S REQUIEM
+        <div id="subtitle">Move to create. Stillness is dissolution.</div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('overlay');
+        
+        // Set canvas to full screen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Mouse tracking
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+        let lastMouseX = mouseX;
+        let lastMouseY = mouseY;
+        let mouseMoved = false;
+        let idleTime = 0;
+        
+        // Comet state
+        const comet = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            targetX: canvas.width / 2,
+            targetY: canvas.height / 2,
+            size: 12,
+            velocity: 0,
+            hue: 200
+        };
+        
+        // Particle system for the tail
+        const particles = [];
+        
+        // Background stars
+        const stars = [];
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 1.5,
+                brightness: Math.random(),
+                twinkleSpeed: Math.random() * 0.02 + 0.01,
+                parallax: Math.random() * 0.3 + 0.1
+            });
+        }
+        
+        // Particle class
+        class Particle {
+            constructor(x, y, velocity, hue) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.life = 1;
+                this.maxLife = 1;
+                this.size = Math.random() * 4 + 2 + velocity * 0.5;
+                this.hue = hue;
+                this.brightness = 50 + velocity * 10;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.008; // Slow fade
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+            }
+            
+            draw() {
+                const alpha = this.life;
+                const currentBrightness = this.brightness * alpha;
+                
+                // Outer glow
+                ctx.globalAlpha = alpha * 0.3;
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
+                gradient.addColorStop(0, `hsl(${this.hue}, 100%, ${currentBrightness}%)`);
+                gradient.addColorStop(1, `hsl(${this.hue}, 100%, ${currentBrightness * 0.3}%, 0)`);
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Core
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = `hsl(${this.hue}, 100%, ${currentBrightness}%)`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        // Mouse move handler
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            mouseMoved = true;
+            idleTime = 0;
+            
+            if (overlay.classList.contains('hidden') === false) {
+                overlay.classList.add('hidden');
+            }
+        });
+        
+        // Touch support
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            mouseX = e.touches[0].clientX;
+            mouseY = e.touches[0].clientY;
+            mouseMoved = true;
+            idleTime = 0;
+            
+            if (overlay.classList.contains('hidden') === false) {
+                overlay.classList.add('hidden');
+            }
+        });
+        
+        // Animation frame counter
+        let frame = 0;
+        
+        function update() {
+            frame++;
+            
+            // Update comet position (smooth interpolation)
+            const easing = 0.15;
+            const dx = mouseX - comet.x;
+            const dy = mouseY - comet.y;
+            
+            comet.x += dx * easing;
+            comet.y += dy * easing;
+            
+            // Calculate velocity
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            comet.velocity = distance * 0.1;
+            
+            // Update hue based on velocity
+            if (comet.velocity > 5) {
+                comet.hue = 45; // Golden/orange for fast movement
+            } else if (comet.velocity > 2) {
+                comet.hue = 180; // Cyan for medium
+            } else {
+                comet.hue = 220; // Blue for slow/idle
+            }
+            
+            // Track idle time
+            const mouseDelta = Math.sqrt(
+                Math.pow(mouseX - lastMouseX, 2) + 
+                Math.pow(mouseY - lastMouseY, 2)
+            );
+            
+            if (mouseDelta < 1) {
+                idleTime++;
+            } else {
+                idleTime = 0;
+            }
+            
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+            
+            // Create new particles along the path
+            if (comet.velocity > 0.5 || idleTime < 30) {
+                const particleCount = Math.ceil(comet.velocity * 0.5) + 1;
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle(
+                        comet.x + (Math.random() - 0.5) * 5,
+                        comet.y + (Math.random() - 0.5) * 5,
+                        comet.velocity,
+                        comet.hue
+                    ));
+                }
+            }
+            
+            // Update and remove dead particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            // Update star twinkle
+            for (let star of stars) {
+                star.brightness = Math.sin(frame * star.twinkleSpeed) * 0.5 + 0.5;
+            }
+        }
+        
+        function draw() {
+            // Clear with fade effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background stars
+            for (let star of stars) {
+                ctx.globalAlpha = star.brightness * 0.8;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            
+            // Draw particles (tail)
+            for (let particle of particles) {
+                particle.draw();
+            }
+            
+            // Draw comet core
+            const cometPulse = idleTime > 30 ? Math.sin(frame * 0.05) * 0.3 + 0.7 : 1;
+            const cometSize = comet.size * cometPulse;
+            
+            // Outer glow layers
+            for (let i = 5; i > 0; i--) {
+                ctx.globalAlpha = 0.1 * cometPulse;
+                const glowSize = cometSize + i * 8;
+                const gradient = ctx.createRadialGradient(comet.x, comet.y, 0, comet.x, comet.y, glowSize);
+                gradient.addColorStop(0, `hsl(${comet.hue}, 100%, 70%)`);
+                gradient.addColorStop(1, `hsl(${comet.hue}, 100%, 30%, 0)`);
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(comet.x, comet.y, glowSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Core bright spot
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = `hsl(${comet.hue}, 100%, 70%)`;
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(comet.x, comet.y, cometSize * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Main comet body
+            const mainGradient = ctx.createRadialGradient(comet.x, comet.y, 0, comet.x, comet.y, cometSize);
+            mainGradient.addColorStop(0, '#ffffff');
+            mainGradient.addColorStop(0.3, `hsl(${comet.hue}, 100%, 80%)`);
+            mainGradient.addColorStop(1, `hsl(${comet.hue}, 100%, 50%)`);
+            ctx.fillStyle = mainGradient;
+            ctx.shadowBlur = 30;
+            ctx.beginPath();
+            ctx.arc(comet.x, comet.y, cometSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+            
+            // Draw meditation text when idle
+            if (idleTime > 120) {
+                ctx.globalAlpha = Math.min((idleTime - 120) / 60, 0.6);
+                ctx.font = '16px "Courier New", monospace';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+                ctx.shadowBlur = 10;
+                
+                const messages = [
+                    'All things fade.',
+                    'Movement creates.',
+                    'Stillness dissolves.',
+                    'The trail remembers.',
+                    'Nothing remains.',
+                    'Beauty is brief.'
+                ];
+                
+                const messageIndex = Math.floor(idleTime / 180) % messages.length;
+                ctx.fillText(messages[messageIndex], canvas.width / 2, canvas.height - 50);
+                
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        gameLoop();
+    </script>
+</body>
+</html>

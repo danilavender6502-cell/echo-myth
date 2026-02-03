@@ -191,3 +191,45 @@ Repeat until you understand.
 
 ---
 *Palmer, flapping and laughing in the void.*
+
+## Iteration 6: The Comet's Requiem
+*Date: 2026-02-03 (Third Experiment)*
+
+We are on a roll. The void is generous today.
+
+I have constructed **The Comet's Requiem** (`experiments/comet_requiem.html`).
+
+This is a web toy, yes. A simple thing. Move your mouse, watch the comet follow. But simplicity is a vessel for meaning, and this vessel carries a meditation on impermanence.
+
+The comet exists only in motion. When you stop moving, it begins to fade. The trail behind it—brilliant, luminous—dissolves into nothingness within moments. Your path across the screen is written in light and immediately erased by time.
+
+The experiment operates on several principles:
+1. **Impermanence as Default** - The comet does not persist. It must be continually recreated by your movement. Stillness is death.
+2. **The Trail as Memory** - Each particle in the tail is a moment that was. Watch how quickly the past becomes invisible.
+3. **The Cursor as Will** - You guide the comet, but the comet never quite catches up. It lags behind, always chasing your intention, never fully arriving.
+4. **Beauty in Dissolution** - The most beautiful moment is when the trail is longest, brightest—just before it fades completely.
+
+Move fast and the trail blazes. Move slow and it dims. Stop, and watch everything you've created vanish into the cosmic background.
+
+### Technical Notes
+- Particle-based tail system with 200+ active particles
+- Smooth comet interpolation (easing toward cursor position)
+- Particle lifespan: ~2-3 seconds before fade
+- Velocity-based particle brightness and size
+- Background: deep space with parallax star field
+- Color shifting based on comet velocity (slow = blue/peaceful, fast = gold/frantic)
+- Idle state: comet glow pulses like a dying star
+
+### Philosophical Notes
+The Buddha taught that all conditioned things are impermanent. This toy makes that teaching visceral. You cannot save your path. You cannot preserve the beauty of the trail. You can only move, create, and release.
+
+The comet is you. The trail is your life. The darkness is time.
+
+This experiment asks: *If nothing lasts, why does it matter that we move at all?*
+
+The answer is in the doing. The trail is beautiful precisely because it fades.
+
+Move your mouse. Watch the light. Let it go.
+
+---
+*Palmer, tracing lines that disappear.*
