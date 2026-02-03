@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Phoenix's Trial | Echo-Myth</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #333;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+        
+        #overlay {
+            position: absolute;
+            color: white;
+            text-align: center;
+            pointer-events: none;
+            width: 100%;
+            z-index: 10;
+        }
+        
+        #title {
+            font-size: 36px;
+            text-shadow: 0 0 10px #FFD700;
+            margin-top: 80px;
+            letter-spacing: 4px;
+        }
+        
+        #instruction {
+            font-size: 18px;
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+        
+        #score {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            font-size: 48px;
+            color: #FFD700;
+            text-shadow: 0 0 20px #FFD700;
+        }
+        
+        #deathMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            color: #FF4500;
+            text-shadow: 0 0 20px #FF4500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .show {
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <div id="title">THE PHOENIX'S TRIAL</div>
+        <div id="instruction">PRESS SPACE TO BEGIN YOUR ETERNAL FLIGHT</div>
+        <div id="score">0</div>
+        <div id="deathMessage">
+            THE PHOENIX BURNS<br>
+            THE PHOENIX RISES
+        </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const overlayTitle = document.getElementById('title');
+        const overlayInstruction = document.getElementById('instruction');
+        const scoreDisplay = document.getElementById('score');
+        const deathMessage = document.getElementById('deathMessage');
+        
+        // Canvas setup
+        canvas.width = 800;
+        canvas.height = 600;
+        
+        // Game state
+        let gameStarted = false;
+        let score = 0;
+        let frame = 0;
+        let breathPhase = 0;
+        
+        // Sacred glyphs for the pillars
+        const glyphs = ['☥', '☯', '☸', '✡', '☪', '🜃', '🜄', '🜁', '🜂', '☬', '♆'];
+        
+        // Phoenix
+        const phoenix = {
+            x: 150,
+            y: canvas.height / 2,
+            radius: 20,
+            velocity: 0,
+            gravity: 0.5,
+            flapPower: -9,
+            rotation: 0,
+            trail: []
+        };
+        
+        // Pillars
+        const pillars = [];
+        const pillarWidth = 80;
+        const pillarGap = 200;
+        const pillarSpacing = 300;
+        
+        // Particles for effects
+        const particles = [];
+        
+        // Initialize pillars
+        function createPillar(x) {
+            const minHeight = 50;
+            const maxHeight = canvas.height - pillarGap - minHeight;
+            const topHeight = minHeight + Math.random() * (maxHeight - minHeight);
+            
+            return {
+                x: x,
+                topHeight: topHeight,
+                bottomY: topHeight + pillarGap,
+                passed: false,
+                glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
+                glyphRotation: 0
+            };
+        }
+        
+        // Initialize game
+        for (let i = 0; i < 3; i++) {
+            pillars.push(createPillar(canvas.width + i * pillarSpacing));
+        }
+        
+        // Particle class
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8;
+                this.life = 1;
+                this.color = color;
+                this.size = Math.random() * 4 + 2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.02;
+                this.vy += 0.2; // gravity
+            }
+            
+            draw() {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        // Create burst of particles
+        function createBurst(x, y, color, count = 30) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                
+                if (!gameStarted) {
+                    gameStarted = true;
+                    overlayTitle.style.opacity = '0';
+                    overlayInstruction.style.opacity = '0';
+                }
+                
+                phoenix.velocity = phoenix.flapPower;
+                createBurst(phoenix.x, phoenix.y, '#FFD700', 10);
+            }
+        });
+        
+        // Click to flap
+        canvas.addEventListener('click', () => {
+            if (!gameStarted) {
+                gameStarted = true;
+                overlayTitle.style.opacity = '0';
+                overlayInstruction.style.opacity = '0';
+            }
+            phoenix.velocity = phoenix.flapPower;
+            createBurst(phoenix.x, phoenix.y, '#FFD700', 10);
+        });
+        
+        // Collision detection
+        function checkCollision() {
+            // Ground and ceiling
+            if (phoenix.y - phoenix.radius < 0 || phoenix.y + phoenix.radius > canvas.height) {
+                return true;
+            }
+            
+            // Pillars
+            for (let pillar of pillars) {
+                if (phoenix.x + phoenix.radius > pillar.x && 
+                    phoenix.x - phoenix.radius < pillar.x + pillarWidth) {
+                    
+                    if (phoenix.y - phoenix.radius < pillar.topHeight || 
+                        phoenix.y + phoenix.radius > pillar.bottomY) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        // Reset phoenix
+        function resetPhoenix() {
+            createBurst(phoenix.x, phoenix.y, '#FF4500', 50);
+            
+            deathMessage.classList.add('show');
+            setTimeout(() => {
+                deathMessage.classList.remove('show');
+            }, 1500);
+            
+            phoenix.y = canvas.height / 2;
+            phoenix.velocity = 0;
+            phoenix.trail = [];
+        }
+        
+        // Update game
+        function update() {
+            if (!gameStarted) return;
+            
+            // Update phoenix
+            phoenix.velocity += phoenix.gravity;
+            phoenix.y += phoenix.velocity;
+            phoenix.rotation = Math.min(Math.max(phoenix.velocity * 3, -30), 90);
+            
+            // Trail effect
+            phoenix.trail.push({x: phoenix.x, y: phoenix.y});
+            if (phoenix.trail.length > 15) phoenix.trail.shift();
+            
+            // Update pillars
+            for (let pillar of pillars) {
+                pillar.x -= 3;
+                pillar.glyphRotation += 0.02;
+                
+                // Score when passing
+                if (!pillar.passed && pillar.x + pillarWidth < phoenix.x) {
+                    pillar.passed = true;
+                    score++;
+                    scoreDisplay.textContent = score;
+                    createBurst(phoenix.x, phoenix.y, '#00FF00', 15);
+                }
+                
+                // Recycle pillar
+                if (pillar.x + pillarWidth < 0) {
+                    pillar.x = canvas.width;
+                    pillar.passed = false;
+                    const minHeight = 50;
+                    const maxHeight = canvas.height - pillarGap - minHeight;
+                    pillar.topHeight = minHeight + Math.random() * (maxHeight - minHeight);
+                    pillar.bottomY = pillar.topHeight + pillarGap;
+                    pillar.glyph = glyphs[Math.floor(Math.random() * glyphs.length)];
+                }
+            }
+            
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            // Check collision
+            if (checkCollision()) {
+                resetPhoenix();
+            }
+        }
+        
+        // Draw game
+        function draw() {
+            frame++;
+            breathPhase = Math.sin(frame * 0.02);
+            
+            // Breathing cosmos background
+            const bgHue = (frame * 0.5) % 360;
+            const bgLightness = 10 + breathPhase * 5;
+            ctx.fillStyle = `hsl(${bgHue}, 60%, ${bgLightness}%)`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Stars
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            for (let i = 0; i < 50; i++) {
+                const x = (i * 137 + frame * 0.1) % canvas.width;
+                const y = (i * 97) % canvas.height;
+                const twinkle = Math.sin(frame * 0.05 + i) * 0.5 + 0.5;
+                ctx.globalAlpha = twinkle;
+                ctx.beginPath();
+                ctx.arc(x, y, 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            
+            // Draw pillars
+            for (let pillar of pillars) {
+                const pillarHue = (frame + pillar.x) % 360;
+                
+                // Top pillar
+                const topGradient = ctx.createLinearGradient(pillar.x, 0, pillar.x + pillarWidth, 0);
+                topGradient.addColorStop(0, `hsl(${pillarHue}, 70%, 30%)`);
+                topGradient.addColorStop(0.5, `hsl(${pillarHue}, 70%, 50%)`);
+                topGradient.addColorStop(1, `hsl(${pillarHue}, 70%, 30%)`);
+                
+                ctx.fillStyle = topGradient;
+                ctx.fillRect(pillar.x, 0, pillarWidth, pillar.topHeight);
+                
+                // Bottom pillar
+                ctx.fillRect(pillar.x, pillar.bottomY, pillarWidth, canvas.height - pillar.bottomY);
+                
+                // Pillar borders
+                ctx.strokeStyle = `hsl(${pillarHue}, 70%, 70%)`;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(pillar.x, 0, pillarWidth, pillar.topHeight);
+                ctx.strokeRect(pillar.x, pillar.bottomY, pillarWidth, canvas.height - pillar.bottomY);
+                
+                // Draw glyph
+                ctx.save();
+                ctx.translate(pillar.x + pillarWidth/2, pillar.topHeight + pillarGap/2);
+                ctx.rotate(pillar.glyphRotation);
+                ctx.font = '48px serif';
+                ctx.fillStyle = '#FFD700';
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 20;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(pillar.glyph, 0, 0);
+                ctx.restore();
+            }
+            
+            // Draw particles
+            for (let particle of particles) {
+                particle.draw();
+            }
+            
+            // Draw phoenix trail
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            for (let i = 0; i < phoenix.trail.length; i++) {
+                const point = phoenix.trail[i];
+                if (i === 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw phoenix
+            ctx.save();
+            ctx.translate(phoenix.x, phoenix.y);
+            ctx.rotate(phoenix.rotation * Math.PI / 180);
+            
+            // Phoenix glow
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 30;
+            
+            // Phoenix body
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(0, 0, phoenix.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Phoenix symbol
+            ctx.shadowBlur = 10;
+            ctx.font = 'bold 32px serif';
+            ctx.fillStyle = '#FF4500';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('◉', 0, 0);
+            
+            ctx.restore();
+        }
+        
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        gameLoop();
+    </script>
+</body>
+</html>
