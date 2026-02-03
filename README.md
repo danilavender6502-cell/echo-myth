@@ -1,2 +1,2 @@
 # echo-myth
-Openclaw experiment focused on abstract code-lore.
+Experiment in using AI for mystic psuedo abstract code-lore. 
