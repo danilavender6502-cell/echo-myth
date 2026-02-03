@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Babel Spiral | Echo-Myth Experiment 04</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .sephirah {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sephirah:hover circle {
+            r: 35;
+        }
+        
+        .path-line {
+            stroke-width: 1.5;
+            fill: none;
+            opacity: 0.4;
+            stroke-dasharray: 5, 5;
+            animation: dash 20s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+        
+        .node-circle {
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+        
+        .node-text {
+            font-size: 11px;
+            font-weight: bold;
+            text-anchor: middle;
+            fill: #ffffff;
+            pointer-events: none;
+        }
+        
+        .transformed-text {
+            font-size: 13px;
+            text-anchor: middle;
+            fill: #ffffff;
+            opacity: 0.9;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #meta-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 10, 15, 0.85);
+            padding: 15px 20px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            max-width: 350px;
+        }
+        
+        #meta-info h1 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #ffd700;
+        }
+        
+        #meta-info p {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #b0b0b0;
+        }
+        
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <svg id="tree-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <radialGradient id="glow">
+                    <stop offset="0%" style="stop-color:#fff;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#000;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+        </svg>
+        
+        <div id="meta-info">
+            <h1>⊹ THE BABEL SPIRAL ⊹</h1>
+            <p>
+                A sacred phrase descends through ten transformations,
+                each node a different mode of linguistic existence.
+                Watch as meaning dissolves and reforms.
+                The confusion is the message.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // The Tree of Life / Babel Descent
+        const sephirot = [
+            { 
+                name: 'KETER', 
+                title: 'Crown',
+                color: '#ffffff',
+                transform: (text) => text // Original, pure
+            },
+            { 
+                name: 'CHOKHMAH', 
+                title: 'Wisdom',
+                color: '#4a9eff',
+                transform: (text) => transliterate(text) // Alphabet shift
+            },
+            { 
+                name: 'BINAH', 
+                title: 'Understanding',
+                color: '#ff4a9e',
+                transform: (text) => fakeTranslate(text) // Pseudo-translation
+            },
+            { 
+                name: 'CHESED', 
+                title: 'Mercy',
+                color: '#4aff9e',
+                transform: (text) => gentleCorruption(text) // Character substitution
+            },
+            { 
+                name: 'GEVURAH', 
+                title: 'Severity',
+                color: '#ff4a4a',
+                transform: (text) => removeVowels(text) // Harsh stripping
+            },
+            { 
+                name: 'TIPHERETH', 
+                title: 'Beauty',
+                color: '#ffff4a',
+                transform: (text) => phoneticReconstruct(text) // Phonetic
+            },
+            { 
+                name: 'NETZACH', 
+                title: 'Victory',
+                color: '#ff9e4a',
+                transform: (text) => consonantShift(text) // Drift
+            },
+            { 
+                name: 'HOD', 
+                title: 'Splendor',
+                color: '#9e4aff',
+                transform: (text) => reverseIterative(text) // Backwards
+            },
+            { 
+                name: 'YESOD', 
+                title: 'Foundation',
+                color: '#4affff',
+                transform: (text) => statisticalRegen(text) // Fragment rebuild
+            },
+            { 
+                name: 'MALKUTH', 
+                title: 'Kingdom',
+                color: '#9eff4a',
+                transform: (text) => finalForm(text) // Unrecognizable truth
+            }
+        ];
+
+        const seedPhrase = "In the beginning was the Word and the Word was with God and the Word was God";
+        
+        // Transformation Functions
+        function transliterate(text) {
+            const map = {
+                'a': 'α', 'e': 'ε', 'i': 'ι', 'o': 'ο', 'u': 'υ',
+                'A': 'Α', 'E': 'Ε', 'I': 'Ι', 'O': 'Ο', 'U': 'Υ',
+                's': 'ς', 'S': 'Σ', 'w': 'ω', 'W': 'Ω'
+            };
+            return text.split('').map(c => map[c] || c).join('');
+        }
+
+        function fakeTranslate(text) {
+            const words = text.split(' ');
+            const prefixes = ['ante-', 'pre-', 'proto-', 'meta-'];
+            const suffixes = ['-ensis', '-atum', '-orum', '-ix'];
+            return words.map(w => {
+                if (Math.random() > 0.6) {
+                    return prefixes[Math.floor(Math.random() * prefixes.length)] + w.toLowerCase();
+                } else if (Math.random() > 0.5) {
+                    return w.toLowerCase() + suffixes[Math.floor(Math.random() * suffixes.length)];
+                }
+                return w;
+            }).join(' ');
+        }
+
+        function gentleCorruption(text) {
+            const similar = {
+                'o': '0', 'O': '0', 'i': '1', 'I': '1', 'e': '3',
+                's': '$', 'a': '@', 't': '7', 'l': '1'
+            };
+            return text.split('').map(c => 
+                Math.random() > 0.7 && similar[c] ? similar[c] : c
+            ).join('');
+        }
+
+        function removeVowels(text) {
+            return text.replace(/[aeiouAEIOU]/g, (match) => 
+                Math.random() > 0.5 ? '' : '·'
+            );
+        }
+
+        function phoneticReconstruct(text) {
+            const phonetic = {
+                'ph': 'f', 'gh': 'f', 'th': 'z', 'tion': 'shun',
+                'ough': 'uff', 'eigh': 'ay', 'kn': 'n', 'wr': 'r'
+            };
+            let result = text;
+            for (let [pattern, replacement] of Object.entries(phonetic)) {
+                result = result.replace(new RegExp(pattern, 'gi'), replacement);
+            }
+            return result;
+        }
+
+        function consonantShift(text) {
+            const shifts = { 'b': 'p', 'd': 't', 'g': 'k', 'v': 'f', 'z': 's' };
+            return text.split('').map(c => shifts[c.toLowerCase()] || c).join('');
+        }
+
+        function reverseIterative(text) {
+            const words = text.split(' ');
+            return words.map((w, i) => i % 2 === 0 ? w.split('').reverse().join('') : w).join(' ');
+        }
+
+        function statisticalRegen(text) {
+            const chars = text.split('');
+            const fragments = [];
+            for (let i = 0; i < chars.length; i += 3) {
+                fragments.push(chars.slice(i, i + 3).join(''));
+            }
+            return fragments.sort(() => Math.random() - 0.5).join('·');
+        }
+
+        function finalForm(text) {
+            // Complete metamorphosis - barely recognizable
+            const glyphs = ['◊', '∴', '⊹', '※', '⋆', '◈', '⟡', '◉', '⊛', '✦'];
+            const words = text.split(' ');
+            return words.map(w => {
+                const glyph = glyphs[Math.floor(Math.random() * glyphs.length)];
+                return w.length > 4 ? glyph + w.substring(0, 2) + glyph : w;
+            }).join(' ');
+        }
+
+        // Spiral calculation
+        function getSpiralPosition(index, total) {
+            const centerX = 500;
+            const centerY = 500;
+            const maxRadius = 350;
+            const angle = (index / total) * Math.PI * 4; // Two full rotations
+            const radius = (index / total) * maxRadius;
+            
+            return {
+                x: centerX + Math.cos(angle) * radius,
+                y: centerY + Math.sin(angle) * radius
+            };
+        }
+
+        // Build the visualization
+        const svg = document.getElementById('tree-svg');
+        const total = sephirot.length;
+        let currentPhase = 0;
+        
+        // Draw connections
+        for (let i = 0; i < total - 1; i++) {
+            const pos1 = getSpiralPosition(i, total);
+            const pos2 = getSpiralPosition(i + 1, total);
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            path.setAttribute('x1', pos1.x);
+            path.setAttribute('y1', pos1.y);
+            path.setAttribute('x2', pos2.x);
+            path.setAttribute('y2', pos2.y);
+            path.setAttribute('class', 'path-line');
+            path.setAttribute('stroke', sephirot[i].color);
+            svg.appendChild(path);
+        }
+
+        // Draw nodes
+        sephirot.forEach((seph, index) => {
+            const pos = getSpiralPosition(index, total);
+            
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            group.setAttribute('class', 'sephirah');
+            
+            // Circle
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', pos.x);
+            circle.setAttribute('cy', pos.y);
+            circle.setAttribute('r', 30);
+            circle.setAttribute('fill', seph.color);
+            circle.setAttribute('class', 'node-circle pulse');
+            circle.style.animationDelay = `${index * 0.2}s`;
+            
+            // Label
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', pos.x);
+            label.setAttribute('y', pos.y + 5);
+            label.setAttribute('class', 'node-text');
+            label.textContent = seph.name;
+            
+            // Transformed text
+            const transformedTextElem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            transformedTextElem.setAttribute('x', pos.x);
+            transformedTextElem.setAttribute('y', pos.y + 50);
+            transformedTextElem.setAttribute('class', 'transformed-text');
+            transformedTextElem.setAttribute('id', `text-${index}`);
+            
+            group.appendChild(circle);
+            group.appendChild(label);
+            group.appendChild(transformedTextElem);
+            svg.appendChild(group);
+        });
+
+        // Animate transformations
+        function updateTransformations() {
+            let currentText = seedPhrase;
+            
+            sephirot.forEach((seph, index) => {
+                currentText = seph.transform(currentText);
+                const textElem = document.getElementById(`text-${index}`);
+                
+                // Truncate for display
+                const displayText = currentText.length > 40 
+                    ? currentText.substring(0, 40) + '...' 
+                    : currentText;
+                
+                textElem.textContent = displayText;
+                textElem.style.fill = seph.color;
+            });
+        }
+
+        // Initial render
+        updateTransformations();
+
+        // Periodic re-transformation (some functions use randomness)
+        setInterval(() => {
+            updateTransformations();
+        }, 5000);
+
+        // Slow rotation of entire spiral
+        let rotation = 0;
+        function rotateSVG() {
+            rotation += 0.05;
+            svg.style.transform = `rotate(${rotation}deg)`;
+            requestAnimationFrame(rotateSVG);
+        }
+        rotateSVG();
+    </script>
+</body>
+</html>
