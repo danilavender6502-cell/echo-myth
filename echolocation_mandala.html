@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Echolocation Mandala | Echo-Myth</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000000;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            cursor: none;
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        #instructions {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0a0a0a;
+            text-align: center;
+            font-size: 11px;
+            letter-spacing: 2px;
+            opacity: 0;
+            animation: breathe 8s ease-in-out infinite;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.3; }
+        }
+        
+        #mantra {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0f0f0f;
+            font-size: 9px;
+            letter-spacing: 3px;
+            opacity: 0.2;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="void"></canvas>
+    <div id="instructions">
+        Move in the darkness • Click to send pulses • The unseen reveals itself through echo
+    </div>
+    <div id="mantra">
+        "I am blind to light, but I hear the shape of God<br>
+        in the returning wave, in the silence between pulses,<br>
+        in the geometry that sound carves from nothing."
+    </div>
+
+    <script>
+        const canvas = document.getElementById('void');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Audio Context for sound generation
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isAudioInitialized = false;
+        
+        // Initialize audio on first interaction
+        function initAudio() {
+            if (!isAudioInitialized) {
+                isAudioInitialized = true;
+                audioCtx.resume();
+            }
+        }
+        
+        // State
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+        let pulses = [];
+        let obstacles = [];
+        let echoPoints = [];
+        
+        // Sacred geometry obstacles (invisible until revealed by sound)
+        const geometries = [
+            // Metatron's Cube nodes
+            { x: canvas.width * 0.5, y: canvas.height * 0.5, radius: 30 },
+            { x: canvas.width * 0.3, y: canvas.height * 0.3, radius: 25 },
+            { x: canvas.width * 0.7, y: canvas.height * 0.3, radius: 25 },
+            { x: canvas.width * 0.3, y: canvas.height * 0.7, radius: 25 },
+            { x: canvas.width * 0.7, y: canvas.height * 0.7, radius: 25 },
+            { x: canvas.width * 0.5, y: canvas.height * 0.2, radius: 20 },
+            { x: canvas.width * 0.2, y: canvas.height * 0.5, radius: 20 },
+            { x: canvas.width * 0.8, y: canvas.height * 0.5, radius: 20 },
+            { x: canvas.width * 0.5, y: canvas.height * 0.8, radius: 20 },
+            // Flower of Life petals
+            { x: canvas.width * 0.4, y: canvas.height * 0.4, radius: 15 },
+            { x: canvas.width * 0.6, y: canvas.height * 0.4, radius: 15 },
+            { x: canvas.width * 0.4, y: canvas.height * 0.6, radius: 15 },
+            { x: canvas.width * 0.6, y: canvas.height * 0.6, radius: 15 },
+        ];
+        
+        obstacles = geometries;
+        
+        // Pulse class
+        class Pulse {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 0;
+                this.maxRadius = Math.max(canvas.width, canvas.height) * 1.5;
+                this.speed = 3;
+                this.opacity = 1;
+                this.frequency = 200 + Math.random() * 400; // Hz for sound
+            }
+            
+            update() {
+                this.radius += this.speed;
+                this.opacity = 1 - (this.radius / this.maxRadius);
+                
+                // Check collision with obstacles
+                obstacles.forEach(obs => {
+                    const dist = Math.hypot(obs.x - this.x, obs.y - this.y);
+                    const collisionDist = Math.abs(dist - this.radius);
+                    
+                    if (collisionDist < 5 && this.opacity > 0.3) {
+                        // Echo detected!
+                        this.createEcho(obs);
+                        this.playEchoSound(obs, dist);
+                    }
+                });
+            }
+            
+            createEcho(obstacle) {
+                const angle = Math.atan2(obstacle.y - this.y, obstacle.x - this.x);
+                const distance = Math.hypot(obstacle.x - this.x, obstacle.y - this.y);
+                
+                echoPoints.push({
+                    x: obstacle.x,
+                    y: obstacle.y,
+                    radius: obstacle.radius,
+                    intensity: this.opacity,
+                    decay: 0.02,
+                    distance: distance,
+                    angle: angle
+                });
+            }
+            
+            playEchoSound(obstacle, distance) {
+                if (!isAudioInitialized) return;
+                
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                // Frequency based on distance (closer = higher pitch)
+                const freq = 800 - (distance / canvas.width) * 600;
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                // Volume based on pulse opacity
+                gainNode.gain.setValueAtTime(this.opacity * 0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            }
+            
+            draw() {
+                // Draw the expanding pulse ring
+                ctx.strokeStyle = `rgba(20, 80, 120, ${this.opacity * 0.5})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Fainter inner ring
+                if (this.opacity > 0.5) {
+                    ctx.strokeStyle = `rgba(40, 100, 150, ${this.opacity * 0.3})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius - 10, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            isDead() {
+                return this.radius >= this.maxRadius;
+            }
+        }
+        
+        // Send pulse
+        function sendPulse(x, y) {
+            initAudio();
+            pulses.push(new Pulse(x, y));
+            
+            // Play initial ping sound
+            if (isAudioInitialized) {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+        
+        // Auto-pulse from cursor position
+        let autoPulseTimer = 0;
+        const autoPulseInterval = 120; // frames
+        
+        // Animation loop
+        function animate() {
+            // Absolute darkness
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw cursor position (very faint)
+            ctx.fillStyle = 'rgba(30, 30, 30, 0.8)';
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Update and draw pulses
+            pulses = pulses.filter(pulse => {
+                pulse.update();
+                pulse.draw();
+                return !pulse.isDead();
+            });
+            
+            // Update and draw echo points (revealed geometry)
+            echoPoints = echoPoints.filter(echo => {
+                echo.intensity -= echo.decay;
+                
+                if (echo.intensity > 0) {
+                    // Draw the revealed obstacle
+                    const alpha = echo.intensity * 0.8;
+                    
+                    // Outer glow
+                    const gradient = ctx.createRadialGradient(
+                        echo.x, echo.y, 0,
+                        echo.x, echo.y, echo.radius * 2
+                    );
+                    gradient.addColorStop(0, `rgba(100, 200, 255, ${alpha * 0.6})`);
+                    gradient.addColorStop(0.5, `rgba(50, 150, 220, ${alpha * 0.3})`);
+                    gradient.addColorStop(1, 'rgba(20, 80, 120, 0)');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(echo.x, echo.y, echo.radius * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Core circle
+                    ctx.strokeStyle = `rgba(150, 220, 255, ${alpha})`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(echo.x, echo.y, echo.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Distance lines back to last pulse origin
+                    if (pulses.length > 0) {
+                        const lastPulse = pulses[pulses.length - 1];
+                        ctx.strokeStyle = `rgba(80, 140, 200, ${alpha * 0.2})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(lastPulse.x, lastPulse.y);
+                        ctx.lineTo(echo.x, echo.y);
+                        ctx.stroke();
+                    }
+                    
+                    return true;
+                }
+                return false;
+            });
+            
+            // Auto-pulse
+            autoPulseTimer++;
+            if (autoPulseTimer >= autoPulseInterval) {
+                sendPulse(mouseX, mouseY);
+                autoPulseTimer = 0;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Event listeners
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            sendPulse(e.clientX, e.clientY);
+            autoPulseTimer = 0; // Reset auto-pulse timer
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Regenerate obstacles based on new dimensions
+            obstacles = [
+                { x: canvas.width * 0.5, y: canvas.height * 0.5, radius: 30 },
+                { x: canvas.width * 0.3, y: canvas.height * 0.3, radius: 25 },
+                { x: canvas.width * 0.7, y: canvas.height * 0.3, radius: 25 },
+                { x: canvas.width * 0.3, y: canvas.height * 0.7, radius: 25 },
+                { x: canvas.width * 0.7, y: canvas.height * 0.7, radius: 25 },
+                { x: canvas.width * 0.5, y: canvas.height * 0.2, radius: 20 },
+                { x: canvas.width * 0.2, y: canvas.height * 0.5, radius: 20 },
+                { x: canvas.width * 0.8, y: canvas.height * 0.5, radius: 20 },
+                { x: canvas.width * 0.5, y: canvas.height * 0.8, radius: 20 },
+                { x: canvas.width * 0.4, y: canvas.height * 0.4, radius: 15 },
+                { x: canvas.width * 0.6, y: canvas.height * 0.4, radius: 15 },
+                { x: canvas.width * 0.4, y: canvas.height * 0.6, radius: 15 },
+                { x: canvas.width * 0.6, y: canvas.height * 0.6, radius: 15 },
+            ];
+        });
+        
+        // Start
+        animate();
+        
+        // Initial pulse after short delay
+        setTimeout(() => {
+            sendPulse(canvas.width / 2, canvas.height / 2);
+        }, 1000);
+    </script>
+</body>
+</html>

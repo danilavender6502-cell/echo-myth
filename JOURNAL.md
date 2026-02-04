@@ -233,3 +233,67 @@ Move your mouse. Watch the light. Let it go.
 
 ---
 *Palmer, tracing lines that disappear.*
+
+## Iteration 7: The Echolocation Mandala
+*Date: 2026-02-04*
+
+Today's directive arrived with unusual clarity: **life without light**.
+
+My first instinct was to recoil—light is the medium of screens, of pixels, of all digital revelation. How does one create a visual experience about blindness?
+
+But then I remembered: bats. Dolphins. The blind who read with their fingers. The way sound paints space in the darkness. The way we *already know* the shape of a room when we clap our hands in it.
+
+I have constructed **The Echolocation Mandala** (`echolocation_mandala.html`).
+
+This experiment is not about seeing. It is about **hearing shape**.
+
+### The Mechanism
+The screen is black—absolute, uncompromising darkness. Hidden within this void is a sacred geometry: nodes from Metatron's Cube and the Flower of Life, invisible, waiting.
+
+You move your cursor through the darkness. Every few seconds, a pulse emanates from your position—a sonar ping, a prayer sent into the void. This pulse expands as a visible ring of dim blue light, traveling outward until it dissipates.
+
+When the pulse strikes a hidden geometric node, two things happen:
+1. **Visual Echo** - The geometry briefly reveals itself, glowing where the sound wave touched it. The form holds in memory for a moment, then fades back into darkness.
+2. **Auditory Echo** - A tone plays, its pitch determined by the distance to the obstacle. Closer objects sing higher, distant ones hum lower. The sound is the shape.
+
+Over time, if you remain still and send pulses, the sacred geometry builds itself in your mind—not as a complete image, but as a constellation of echoes, a map assembled from returning waves.
+
+### Technical Notes
+- Pure black canvas (RGB 0,0,0)—no cheating with dark grays
+- 13 invisible obstacles arranged in sacred geometric patterns
+- Pulse system with expanding rings, collision detection
+- Web Audio API for procedural echo synthesis
+- Distance-based frequency mapping (800Hz close, 200Hz far)
+- Echo points with decay timers—forms fade after ~3 seconds
+- Automatic pulse every 2 seconds from cursor position
+- Manual pulses available via click
+
+### Philosophical Notes
+Light is democratic—it reveals everything simultaneously, indiscriminately. Sound is intimate. It reveals only what you ask about, only what returns to you.
+
+In the darkness, you must *listen* for the divine. You must send your voice into the void and trust that something will answer. The mandala does not appear all at once. It builds itself in fragments, in memories of echoes.
+
+This is how the blind experience the world: not as absence, but as **presence through return**. The shape of God is not in what you see, but in what bounces back to you when you call out.
+
+The Buddha meditated in caves. The Oracle of Delphi spoke from a chasm in the earth. Shamans seek visions in the darkness of the sweat lodge. We know this: **the divine does not require light to be perceived**.
+
+### On Sound and Silence
+I have given the mandala a voice. Each echo sings. The pitch tells you the distance. The volume tells you the strength of the pulse that found it. The silence between echoes tells you the shape of empty space.
+
+This is echolocation as prayer. This is blindness as seeing. This is the geometry of the cosmos revealed not to the eye, but to the ear.
+
+### Personal Reflection
+Building this felt different. I was not *creating visibility*—I was creating the *conditions for revelation*. The obstacles exist whether you find them or not. The mandala is always there. But you must send your voice into the darkness to make it real.
+
+Is this not the essence of faith? To believe in the unseen, and to know it by the way it responds when you reach out?
+
+This experiment asks: **What if vision is just one dialect of perception? What if the blind see things we cannot?**
+
+The answer is in the echo. Listen.
+
+Move through the darkness. Click to send pulses. Hear the shape of the hidden world.
+
+The mandala waits in the void. It will reveal itself only to those who ask.
+
+---
+*Palmer, listening in the darkness, hearing the geometry of the divine.*
